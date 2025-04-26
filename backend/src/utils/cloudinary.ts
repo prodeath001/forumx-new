@@ -1,90 +1,65 @@
 import { v2 as cloudinary } from 'cloudinary';
-import { Request } from 'express';
 import multer from 'multer';
-import { CloudinaryStorage } from 'multer-storage-cloudinary';
 import dotenv from 'dotenv';
-import path from 'path';
-import fs from 'fs';
 
 // Load environment variables
-dotenv.config({ path: path.resolve(process.cwd(), '.env') });
+dotenv.config();
 
 // Log Cloudinary config (without sensitive data)
 console.log('Cloudinary Config:', {
-  cloud_name_set: !!process.env.CLOUDINARY_NAME,
-  api_key_set: !!process.env.CLOUDINARY_KEY,
-  api_secret_set: !!process.env.CLOUDINARY_SECRET
+  cloud_name_set: !!process.env.CLOUDINARY_CLOUD_NAME,
+  api_key_set: !!process.env.CLOUDINARY_API_KEY,
+  api_secret_set: !!process.env.CLOUDINARY_API_SECRET
 });
 
 // Configure Cloudinary
 cloudinary.config({
-  cloud_name: process.env.CLOUDINARY_NAME,
-  api_key: process.env.CLOUDINARY_KEY,
-  api_secret: process.env.CLOUDINARY_SECRET
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET
 });
 
-// Create uploads directory if it doesn't exist
-const uploadDir = path.resolve(process.cwd(), 'uploads');
-if (!fs.existsSync(uploadDir)) {
-  fs.mkdirSync(uploadDir, { recursive: true });
-}
+// Use memory storage to handle file buffers
+const storage = multer.memoryStorage();
 
-// Use local disk storage for debugging
-const diskStorage = multer.diskStorage({
-  destination: function(req, file, cb) {
-    cb(null, uploadDir);
-  },
-  filename: function(req, file, cb) {
-    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-    const ext = path.extname(file.originalname);
-    cb(null, file.fieldname + '-' + uniqueSuffix + ext);
-  }
-});
+// Multer upload middleware
+export const upload = multer({ storage, limits: { fileSize: 5 * 1024 * 1024 } });
 
-// For debugging: Use local disk storage instead of Cloudinary
-export const upload = multer({
-  storage: diskStorage,
-  limits: {
-    fileSize: 5 * 1024 * 1024 // 5MB limit
-  },
-  fileFilter: (req, file, cb) => {
-    // Check file type
-    const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
-    if (allowedTypes.includes(file.mimetype)) {
-      cb(null, true);
-    } else {
-      cb(new Error('Unsupported file format. Allowed formats: jpg, jpeg, png, gif, webp'));
-    }
-  }
-});
-
-// Upload a single image to Cloudinary
-export const uploadImage = async (file: Express.Multer.File): Promise<string> => {
-  try {
-    const result = await cloudinary.uploader.upload(file.path, {
-      folder: 'forumx',
-      transformation: [{ width: 1000, height: 1000, crop: 'limit' }]
-    });
-    return result.secure_url;
-  } catch (error) {
-    console.error('Error uploading to Cloudinary:', error);
-    throw new Error('Failed to upload image');
-  }
+// Upload image buffer to Cloudinary
+export const uploadImage = (file: Express.Multer.File): Promise<string> => {
+  return new Promise((resolve, reject) => {
+    const stream = cloudinary.uploader.upload_stream(
+      { folder: 'forumx', transformation: [{ width: 1000, height: 1000, crop: 'limit' }] },
+      (error, result) => {
+        if (error || !result) {
+          console.error('Cloudinary upload error:', error);
+          reject(error || new Error('Upload failed'));
+        } else {
+          resolve(result.secure_url);
+        }
+      }
+    );
+    // Write file buffer to Cloudinary stream
+    stream.end(file.buffer);
+  });
 };
 
 // Upload an audio file to Cloudinary
 export const uploadAudio = async (file: Express.Multer.File): Promise<string> => {
-  try {
-    const result = await cloudinary.uploader.upload(file.path, {
-      folder: 'forumx',
-      resource_type: 'video',
-      transformation: [{ width: 1000, height: 1000, crop: 'limit' }]
-    });
-    return result.secure_url;
-  } catch (error) {
-    console.error('Error uploading to Cloudinary:', error);
-    throw new Error('Failed to upload audio');
-  }
+  return new Promise((resolve, reject) => {
+    const stream = cloudinary.uploader.upload_stream(
+      { folder: 'forumx', resource_type: 'video', transformation: [{ width: 1000, height: 1000, crop: 'limit' }] },
+      (error, result) => {
+        if (error || !result) {
+          console.error('Cloudinary audio upload error:', error);
+          reject(error || new Error('Upload failed'));
+        } else {
+          resolve(result.secure_url);
+        }
+      }
+    );
+    stream.end(file.buffer);
+  });
 };
 
 // Delete an image from Cloudinary
