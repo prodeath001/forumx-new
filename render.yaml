@@ -2,7 +2,7 @@ services:
   - type: web
     name: forumx-frontend
     env: static
-    buildCommand: chmod +x build.sh && ./build.sh
+    buildCommand: npm run build
     staticPublishPath: ./dist
     envVars:
       - key: NODE_VERSION
