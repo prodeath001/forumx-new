@@ -1,6 +1,6 @@
 import express from 'express';
 import { Request, Response } from 'express';
-import { upload } from '../utils/cloudinary';
+import { upload, uploadImage } from '../utils/cloudinary';
 import { protect } from '../middleware/auth';
 import { createError } from '../utils/errorHandler';
 import path from 'path';
@@ -58,44 +58,15 @@ router.post('/',
   },
   async (req: Request, res: Response) => {
     try {
-      console.log('Multer processed request, file:', !!req.file);
-      
+      // Ensure file exists
       if (!req.file) {
-        console.error('No file after multer processing');
-        return res.status(400).json({
-          success: false,
-          error: 'Please upload an image file'
-        });
+        return res.status(400).json({ success: false, error: 'No image file provided' });
       }
-
-      console.log('File uploaded, details:', {
-        filename: req.file.filename,
-        path: req.file.path,
-        mimetype: req.file.mimetype,
-        size: req.file.size
-      });
-
-      // For local storage, construct a URL that can be accessed
-      const baseUrl = `${req.protocol}://${req.get('host')}`;
-      
-      // Handle Windows-style paths with backslashes
-      let filePath = req.file.path.replace(/\\/g, '/');
-      
-      // Extract just the filename if needed
-      const filename = path.basename(filePath);
-      
-      // Create the URL (either with path or just filename based on your server setup)
-      const imageUrl = `${baseUrl}/uploads/${filename}`;
-      
-      console.log('Image URL constructed:', imageUrl);
-      
-      // Return success response with image URL
-      return res.status(200).json({
-        success: true,
-        data: {
-          imageUrl: imageUrl // Return the constructed URL
-        }
-      });
+      console.log('Uploading to Cloudinary:', req.file.path);
+      // Upload to Cloudinary and get secure URL
+      const cloudUrl = await uploadImage(req.file);
+      console.log('Cloudinary URL:', cloudUrl);
+      return res.status(200).json({ success: true, data: { imageUrl: cloudUrl } });
     } catch (error) {
       console.error('Upload handler error:', error);
       return res.status(500).json({
