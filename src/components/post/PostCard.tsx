@@ -269,8 +269,12 @@ export const PostCard = ({ post, onPostDeleted }: PostCardProps) => {
     }
   };
   
-  // Cloudinary image URL
-  const imageSrc = post.imageUrl || null;
+  // Determine image source
+  const imageSrc = post.imageUrl
+    ? post.imageUrl.startsWith('http')
+      ? post.imageUrl
+      : `/uploads/${post.imageUrl}`
+    : null;
   
   return (
     <Card className="overflow-hidden hover:shadow-md transition-shadow">
