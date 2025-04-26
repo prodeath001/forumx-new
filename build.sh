@@ -1,8 +1,8 @@
 #!/bin/bash
-echo "Installing dependencies..."
+echo "Installing frontend dependencies..."
 npm install
 
-echo "Explicitly installing Vite and plugin..."
+echo "Installing Vite and plugin..."
 npm install vite@5.4.1 @vitejs/plugin-react-swc@3.5.0
 
 echo "Creating minimal Vite config..."
@@ -21,7 +21,17 @@ export default defineConfig({
 });
 EOF
 
-echo "Building project..."
+echo "Building frontend..."
 ./node_modules/.bin/vite build
 
-echo "Build completed!" 
+echo "Frontend build completed!"
+
+echo "Building backend dependencies..."
+cd backend
+npm install --legacy-peer-deps
+
+echo "Building backend..."
+npm run build
+cd ..
+
+echo "All builds completed!" 
