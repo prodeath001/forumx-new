@@ -2,13 +2,11 @@ services:
   - type: web
     name: forumx-frontend
     env: static
-    buildCommand: npm install && npm install -g vite && npm run build
+    buildCommand: chmod +x build.sh && ./build.sh
     staticPublishPath: ./dist
     envVars:
       - key: NODE_VERSION
         value: 18
-      - key: PATH
-        value: ${PATH}:${HOME}/.npm-global/bin
     routes:
       - type: rewrite
         source: /*
