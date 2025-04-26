@@ -8,7 +8,8 @@
     "build": "bash ./build.sh",
     "build:dev": "vite build --mode development",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "start": "echo 'This is a static site, no server needed'"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.9.0",
