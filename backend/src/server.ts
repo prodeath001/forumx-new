@@ -77,180 +77,18 @@ app.get('/health', (req: Request, res: Response) => {
   res.status(200).json({ status: 'ok', message: 'Server is healthy' });
 });
 
-// 404 handler
-app.use((req: Request, res: Response, next: NextFunction) => {
-  res.status(404).json({
-    success: false,
-    error: `Route ${req.originalUrl} not found`
-  });
-});
-
-// Error handler
-app.use(errorHandler);
-
-// Serve React static build
+// Serve React static build from root dist folder
 const clientBuildPath = path.resolve(__dirname, '../../dist');
 app.use(express.static(clientBuildPath));
 app.get('*', (req, res) => {
   res.sendFile(path.join(clientBuildPath, 'index.html'));
 });
 
-// Update JWT secret
-const JWT_SECRET = process.env.JWT_SECRET || 'your_jwt_secret_key_for_forumx';
-
-// Socket.io Authentication middleware
-io.use((socket: Socket, next: (err?: Error) => void) => {
-  try {
-    const token = socket.handshake.auth.token;
-    
-    if (!token) {
-      console.log('Socket auth: No token provided');
-      return next(new Error('Authentication error: No token provided'));
-    }
-    
-    // Verify token using our shared verification function
-    const decoded = verifyToken(token);
-    if (!decoded) {
-      console.error('Socket auth: Token verification failed');
-      return next(new Error('Authentication error: Invalid token'));
-    }
-    
-    // Initialize user data object if it doesn't exist
-    if (!socket.data) {
-      socket.data = { user: decoded };
-    } else {
-      socket.data.user = decoded;
-    }
-    
-    console.log(`Socket auth successful for user: ${decoded.username} (${decoded.id})`);
-    next();
-  } catch (err: any) {
-    console.error('Socket auth error:', err.message);
-    return next(new Error('Authentication error: Invalid token'));
-  }
-});
-
-// Socket.io connection and event handling
-io.on('connection', (socket: Socket) => {
-  try {
-    const user = socket.data?.user;
-    console.log(`User connected: ${socket.id} - User: ${user?.username || 'Unknown'}`);
-    
-    // Join a discussion room
-    socket.on('joinDiscussion', (discussionId: string) => {
-      if (!discussionId) {
-        console.error('Invalid discussion ID');
-        return;
-      }
-      
-      const roomName = `discussion:${discussionId}`;
-      socket.join(roomName);
-      console.log(`User ${user?.id} joined discussion ${discussionId}`);
-      
-      // Notify others that a user has joined
-      socket.to(roomName).emit('userJoined', {
-        userId: user?.id,
-        username: user?.username
-      });
-    });
-    
-    // Leave a discussion room
-    socket.on('leaveDiscussion', (discussionId: string) => {
-      if (!discussionId) {
-        console.error('Invalid discussion ID');
-        return;
-      }
-      
-      const roomName = `discussion:${discussionId}`;
-      socket.leave(roomName);
-      console.log(`User ${user?.id} left discussion ${discussionId}`);
-      
-      // Notify others that a user has left
-      socket.to(roomName).emit('userLeft', {
-        userId: user?.id,
-        username: user?.username
-      });
-    });
-    
-    // Send a message to a discussion room
-    socket.on('sendMessage', async (data: { discussionId: string; content: string }) => {
-      if (!data || !data.discussionId || !data.content) {
-        console.error('Invalid message data', data);
-        return;
-      }
-      
-      const { discussionId, content } = data;
-      const roomName = `discussion:${discussionId}`;
-      
-      console.log(`Message from ${user?.username} to ${roomName}: ${content.substring(0, 30)}...`);
-      
-      try {
-        // Save message to database
-        const newMessage = await DiscussionMessage.create({
-          discussionId: new mongoose.Types.ObjectId(discussionId),
-          sender: new mongoose.Types.ObjectId(user?.id),
-          senderUsername: user?.username,
-          content
-        });
-        
-        // Create message object to send to clients
-        const message: ChatMessage = {
-          id: newMessage._id.toString(),
-          userId: user?.id,
-          username: user?.username,
-          content,
-          timestamp: newMessage.createdAt
-        };
-        
-        // Broadcast the message to everyone in the room
-        io.to(roomName).emit('newMessage', message);
-        
-        console.log(`Message saved to database with ID: ${newMessage._id}`);
-      } catch (error) {
-        console.error('Error saving message to database:', error);
-        // Still send the message even if database save fails
-        const message: ChatMessage = {
-          id: Date.now().toString(),
-          userId: user?.id,
-          username: user?.username,
-          content,
-          timestamp: new Date()
-        };
-        io.to(roomName).emit('newMessage', message);
-      }
-    });
-    
-    // Handle typing indicators
-    socket.on('typing', (discussionId: string) => {
-      if (!discussionId) return;
-      
-      const roomName = `discussion:${discussionId}`;
-      socket.to(roomName).emit('userTyping', {
-        userId: user?.id,
-        username: user?.username
-      });
-    });
-    
-    socket.on('stopTyping', (discussionId: string) => {
-      if (!discussionId) return;
-      
-      const roomName = `discussion:${discussionId}`;
-      socket.to(roomName).emit('userStoppedTyping', {
-        userId: user?.id
-      });
-    });
-    
-    // Handle disconnection
-    socket.on('disconnect', (reason) => {
-      console.log(`User disconnected: ${socket.id} - Reason: ${reason}`);
-    });
-  } catch (error: any) {
-    console.error('Socket error in connection handler:', error.message);
-  }
-});
+// Error handler
+app.use(errorHandler);
 
 // Start server
-const PORT = process.env.PORT || 5001;
+const PORT = process.env.PORT || 10000;
 server.listen(PORT, () => {
   console.log(`Server running in ${process.env.NODE_ENV} mode on port ${PORT}`);
   console.log(`Socket.io server is also running`);
