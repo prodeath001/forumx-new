@@ -1,13 +1,21 @@
 services:
   - type: web
-    name: forumx-frontend
-    env: static
-    buildCommand: npm run build
-    staticPublishPath: ./dist
+    name: forumx
+    env: node
+    region: oregon
+    buildCommand: bash ./build.sh
+    startCommand: npm start
     envVars:
-      - key: NODE_VERSION
-        value: 18
-    routes:
-      - type: rewrite
-        source: /*
-        destination: /index.html
+      - key: NODE_ENV
+        value: production
+      - key: MONGODB_URI
+        value: mongodb+srv://vamsi:vamsi@cluster0.bs35jrd.mongodb.net/forumx_db
+      - key: JWT_SECRET
+        value: your_jwt_secret_key_for_forumx
+      - key: CLOUDINARY_CLOUD_NAME
+        value: your_cloud_name
+      - key: CLOUDINARY_API_KEY
+        value: your_api_key
+      - key: CLOUDINARY_API_SECRET
+        value: your_api_secret
+    healthCheckPath: /health
