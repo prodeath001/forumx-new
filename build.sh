@@ -1,4 +1,5 @@
 #!/bin/bash
+set -euo pipefail
 echo "Installing frontend dependencies (ignoring local .npmrc)..."
 npm --userconfig=/dev/null install
 
@@ -22,7 +23,8 @@ export default defineConfig({
 EOF
 
 echo "Building frontend (increasing memory limit)..."
-export NODE_OPTIONS=--max_old_space_size=2048
+export NODE_OPTIONS=--max_old_space_size=4096
+echo "NODE_OPTIONS set to $NODE_OPTIONS"
 node_modules/.bin/vite build
 
 echo "Frontend build completed!"

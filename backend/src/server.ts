@@ -77,8 +77,8 @@ app.get('/health', (req: Request, res: Response) => {
   res.status(200).json({ status: 'ok', message: 'Server is healthy' });
 });
 
-// Serve React static build from root dist folder
-const clientBuildPath = path.resolve(__dirname, '../../dist');
+// Serve React static build
+const clientBuildPath = path.resolve(process.cwd(), 'dist');
 app.use(express.static(clientBuildPath));
 app.get('*', (req, res) => {
   res.sendFile(path.join(clientBuildPath, 'index.html'));
