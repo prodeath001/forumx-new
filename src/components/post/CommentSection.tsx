@@ -18,16 +18,13 @@ import { Link } from "react-router-dom";
 import { toast } from "@/hooks/use-toast";
 import { useQueryClient } from "@tanstack/react-query";
 import { createComment } from "@/lib/api";
-import axios from "axios";
+import api, { API_URL } from "@/lib/axios";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-
-// API base URL (must match the one in api.ts)
-const API_URL = "http://localhost:5000";
 
 interface Comment {
   id: string;
@@ -93,15 +90,9 @@ export const CommentSection = ({ postId, comments }: CommentSectionProps) => {
       };
       
       // Make direct API call instead of using the createComment function
-      const response = await axios.post(
-        `${API_URL}/api/posts/${postId}/comments`,
-        requestBody,
-        {
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${localStorage.getItem('token') || 'fallback-token'}`
-          }
-        }
+      const response = await api.post(
+        `/api/posts/${postId}/comments`,
+        requestBody
       );
       
       console.log('Comment posted successfully:', response.data);
@@ -241,14 +232,10 @@ const CommentItem = ({ comment, postId, level = 0 }: CommentItemProps) => {
       }
       
       // Make API call
-      const response = await axios.post(`${API_URL}/api/comments/${comment.id}/vote`, {
+      const response = await api.post(`/api/comments/${comment.id}/vote`, {
         voteType: direction,
         userId: user._id,
         username: currentUsername
-      }, {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem('token') || 'fallback-token'}`
-        }
       });
       
       console.log('Vote response:', response.data);
@@ -274,11 +261,7 @@ const CommentItem = ({ comment, postId, level = 0 }: CommentItemProps) => {
       
       // Try to fetch the current state
       try {
-        const response = await axios.get(`${API_URL}/api/comments/${comment.id}`, {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem('token') || 'fallback-token'}`
-          }
-        });
+        const response = await api.get(`/api/comments/${comment.id}`);
         
         const { upvotes, downvotes } = response.data.data;
         setVoteCount(upvotes - downvotes);
@@ -364,14 +347,7 @@ const CommentItem = ({ comment, postId, level = 0 }: CommentItemProps) => {
     }
 
     try {
-      const response = await axios.delete(
-        `${API_URL}/api/comments/${comment.id}`,
-        {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem('token') || 'fallback-token'}`
-          }
-        }
-      );
+      const response = await api.delete(`/api/comments/${comment.id}`);
 
       console.log('Comment deleted:', response.data);
       
@@ -406,15 +382,10 @@ const CommentItem = ({ comment, postId, level = 0 }: CommentItemProps) => {
     }
 
     try {
-      const response = await axios.put(
-        `${API_URL}/api/comments/${comment.id}`,
+      const response = await api.put(
+        `/api/comments/${comment.id}`,
         {
           content: editText.trim()
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem('token') || 'fallback-token'}`
-          }
         }
       );
 
