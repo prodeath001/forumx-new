@@ -1,8 +1,8 @@
 import axios from 'axios';
 import { clearAuthTokens } from './auth';
 
-// API URL from environment variables with fallback
-export const API_URL = import.meta.env.VITE_API_URL || '';
+// API URL from environment variables with fallback to current origin
+export const API_URL = import.meta.env.VITE_API_URL || window.location.origin;
 
 // Create a custom axios instance with configured defaults
 const api = axios.create({
