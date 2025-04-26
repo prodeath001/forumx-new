@@ -20,7 +20,7 @@ import api from "@/lib/axios";
 import { createPost } from "../lib/api";
 
 // API base URL
-const API_URL = "http://localhost:5000";
+const API_URL = "https://forumx-iime.onrender.com";
 
 // Define interface for community data
 interface Community {

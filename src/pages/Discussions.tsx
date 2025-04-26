@@ -12,7 +12,7 @@ import { EmptyState } from "@/components/ui/empty-state";
 import api from "@/lib/axios";
 
 // API base URL
-const API_URL = "http://localhost:5000";
+const API_URL = "https://forumx-iime.onrender.com";
 
 interface Discussion {
   _id: string;

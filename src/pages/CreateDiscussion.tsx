@@ -18,7 +18,7 @@ import { useAuth } from "@/lib/auth";
 import axios from "axios";
 
 // API base URL
-const API_URL = "http://localhost:5000";
+const API_URL = "https://forumx-iime.onrender.com";
 
 interface Community {
   _id: string;

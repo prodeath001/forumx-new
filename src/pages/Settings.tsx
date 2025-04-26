@@ -18,7 +18,7 @@ import { User, Bell, Shield, Volume, Settings as SettingsIcon } from "lucide-rea
 import axios from "axios";
 
 // API base URL - update this to match your backend URL
-const API_URL = "http://localhost:5000";
+const API_URL = import.meta.env.VITE_API_URL || window.location.origin;
 
 const Settings = () => {
   const { user, updateUser, logout, token } = useAuth();

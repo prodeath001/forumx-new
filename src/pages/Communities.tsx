@@ -12,10 +12,11 @@ import axios from "axios";
 import { EmptyState } from "@/components/ui/empty-state";
 
 // API base URL
-const API_URL = "http://localhost:5000";
+const API_URL = "https://forumx-iime.onrender.com";
 
 interface Community {
   _id: string;
+  slug: string;
   name: string;
   description: string;
   memberCount: number;

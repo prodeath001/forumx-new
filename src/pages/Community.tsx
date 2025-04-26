@@ -16,7 +16,7 @@ import { Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 // API base URL
-const API_URL = "http://localhost:5000";
+const API_URL = "https://forumx-iime.onrender.com";
 
 // Define interfaces for type safety
 interface Community {

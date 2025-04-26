@@ -48,7 +48,7 @@ export interface Reply extends Omit<Comment, 'replies'> {
 }
 
 // Use environment variables for API URL with fallback
-export const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
+export const API_URL = import.meta.env.VITE_API_URL || "https://forumx-iime.onrender.com";
 
 // Updated API Functions with real endpoints
 const fetchAllPosts = async (): Promise<Post[]> => {
