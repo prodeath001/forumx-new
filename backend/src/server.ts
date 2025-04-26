@@ -88,6 +88,13 @@ app.use((req: Request, res: Response, next: NextFunction) => {
 // Error handler
 app.use(errorHandler);
 
+// Serve React static build
+const clientBuildPath = path.resolve(__dirname, '../../dist');
+app.use(express.static(clientBuildPath));
+app.get('*', (req, res) => {
+  res.sendFile(path.join(clientBuildPath, 'index.html'));
+});
+
 // Update JWT secret
 const JWT_SECRET = process.env.JWT_SECRET || 'your_jwt_secret_key_for_forumx';
 
