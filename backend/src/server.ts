@@ -56,10 +56,11 @@ setupAudioHandler(io);
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
-app.use(cors({
-  origin: ['http://localhost:5173', 'http://localhost:3000', 'http://localhost:8080'],
-  credentials: true
-}));
+
+// Enable CORS for all origins (or specify your deployed domain via CORS_ORIGIN env var)
+dotenv.config();
+const corsOrigin = process.env.CORS_ORIGIN || '*';
+app.use(cors({ origin: corsOrigin, credentials: true }));
 
 // Serve static files from the uploads directory
 app.use('/uploads', express.static(path.join(process.cwd(), 'uploads')));
