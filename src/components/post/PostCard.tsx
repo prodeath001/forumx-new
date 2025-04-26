@@ -269,6 +269,9 @@ export const PostCard = ({ post, onPostDeleted }: PostCardProps) => {
     }
   };
   
+  // Cloudinary image URL
+  const imageSrc = post.imageUrl || null;
+  
   return (
     <Card className="overflow-hidden hover:shadow-md transition-shadow">
       <CardContent className="p-4">
@@ -332,10 +335,10 @@ export const PostCard = ({ post, onPostDeleted }: PostCardProps) => {
             </div>
             
             {/* Display post image if available */}
-            {post.imageUrl && (
+            {imageSrc && (
               <div className="mt-3 rounded-md overflow-hidden">
                 <img 
-                  src={post.imageUrl} 
+                  src={imageSrc} 
                   alt={post.title}
                   className="w-full h-auto max-h-[300px] object-contain"
                   loading="lazy"
