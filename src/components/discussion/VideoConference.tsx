@@ -50,8 +50,8 @@ const VideoConference: React.FC<VideoConferenceProps> = ({ discussionId, onBack 
         const roomID = discussionId;
         const userID = user?._id || Math.floor(Math.random() * 10000).toString();
         const userName = user?.username || "Guest";
-        const appID = 434816214;
-        const serverSecret = "34ed80675b0aaaa71730529f563dd474";
+        const appID = 1812051207;
+        const serverSecret = "d11a7111b9acc32a473cda3981846b52";
         
         // Generate token
         const kitToken = window.ZegoUIKitPrebuilt.generateKitTokenForTest(
